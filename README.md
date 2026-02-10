@@ -49,19 +49,22 @@ Try it yourself: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/
 
 ### Example Search Results
 
+
 <div align="center">
 
 **Query: "children on amusement park ride"**
 
-![Children on ride](Children_talking_ride.jpg)
+<img src="Children%20talking%20ride.jpg" width="600"/>
 
 **Query: "person photographing wildlife by water"**
 
-![Woman photographing duck](A_women_cliciking_pic_of_duck.jpg)
+<img src="A%20women%20cliciking%20pic%20of%20duck.jpg" width="600"/>
 
 **Query: "skiing in snowy forest"**
 
-![Man skiing in snow](Man_surfing_in_snow.jpg)
+<img src="Man%20surfing%20in%20snow.jpg" width="600"/>
+
+</div>
 
 *CLIP semantic search successfully matches natural language queries to relevant images*
 
