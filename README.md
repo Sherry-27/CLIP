@@ -44,6 +44,7 @@ Traditional image search relies on metadata and tags. This project enables:
 
 ### Live Demo
 Try it yourself: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/Shaheerkhan/clip-faiss-image-search)**
+
 **Kaggle Training Notebook**: https://www.kaggle.com/code/shaheerkhan27/clipp
 
 ### Example Search Results
