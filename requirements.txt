@@ -1,11 +1,12 @@
-%%writefile hf_space_files/requirements.txt
 torch
 torchvision
 ftfy
 regex
 tqdm
-git+https://github.com/openai/CLIP.git
-faiss-cpu                  # use faiss-gpu-cu12 if you enable GPU in Space
 pillow
 numpy
-gradio>=4.0.0
+faiss-cpu
+gradio>=4.0
+open-clip-torch==2.24.0
+boto3
+botocore
