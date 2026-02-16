@@ -47,7 +47,7 @@ Traditional image search relies on metadata and tags. This project enables:
 ### Live Demo
 **Try it yourself**: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/Sherry27/clip-visual-search)**
 
-**Kaggle Training Notebook**: https://www.kaggle.com/code/shaheerkhan27/clipp
+**Kaggle Training Notebook**: **[https://www.kaggle.com/code/shaheerkhan27/clipp]**
 
 ### Example Search Results
 
