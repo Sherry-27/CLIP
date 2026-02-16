@@ -20,7 +20,7 @@
 
 ## 🎯 Overview
 
-A production-ready semantic image search engine that enables natural language queries over large image collections. Built with OpenAI's CLIP model and FAISS for efficient similarity search, achieving **sub-30ms query latency** on a dataset of **13,000+ images**.
+A production-ready semantic image search engine that enables natural language queries over large image collections. Built with OpenAI's CLIP model, FAISS for efficient similarity search, and **AWS S3 for scalable storage**, achieving **sub-30ms query latency** on a dataset of **13,000+ images**.
 
 ### Why This Project?
 
@@ -29,56 +29,47 @@ Traditional image search relies on metadata and tags. This project enables:
 - 🚀 **Zero-Shot Retrieval**: No training needed for new image categories
 - ⚡ **Real-Time Performance**: <30ms average query latency
 - 🎯 **Semantic Understanding**: Matches concepts, not just keywords
+- ☁️ **Cloud Storage**: AWS S3 backend with presigned URLs for persistent storage
 
 ## ✨ Features
 
 - 🧠 **CLIP-based Embeddings**: 512-dimensional normalized feature vectors
 - 📊 **FAISS Indexing**: Optimized cosine similarity search with IndexFlatIP
+- ☁️ **AWS S3 Backend**: Scalable cloud storage with presigned URLs for image upload/retrieval
 - 🎨 **Multi-Modal Search**: Text-to-image and image-to-image retrieval
 - ⚡ **Blazing Fast**: <30ms average query response time
 - 🌐 **Web Interface**: Interactive Gradio demo on HuggingFace Spaces
-- 📈 **Scalable**: Efficient handling of 13K+ image database
-- 🔄 **Easy Integration**: Simple API for adding new images
+- 📈 **Scalable**: Efficient handling of 13K+ image database with cloud storage
+- 🔄 **Dynamic Uploads**: Users can upload new images to expand the search database
 
 ## 🎬 Demo
 
 ### Live Demo
-Try it yourself: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/Shaheerkhan/clip-faiss-image-search)**
+Try it yourself: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/Sherry27/clip-visual-search)**
 
-**Kaggle Training Notebook**: https://www.kaggle.com/code/shaheerkhan27/clipp
-
-### Example Search Results
-
+### Example Queries
 
 <div align="center">
 
-**Query: "children on amusement park ride"**
-
-<img src="Children%20talking%20ride.jpg" width="600"/>
-
-**Query: "person photographing wildlife by water"**
-
-<img src="A%20women%20cliciking%20pic%20of%20duck.jpg" width="600"/>
-
-**Query: "skiing in snowy forest"**
-
-<img src="Man%20surfing%20in%20snow.jpg" width="600"/>
+| Query | Top Results |
+|-------|-------------|
+| "sunset over mountains" | ![Result 1](demo/sunset1.jpg) ![Result 2](demo/sunset2.jpg) ![Result 3](demo/sunset3.jpg) |
+| "person walking a dog in park" | ![Result 1](demo/dog1.jpg) ![Result 2](demo/dog2.jpg) ![Result 3](demo/dog3.jpg) |
+| "modern architecture building" | ![Result 1](demo/arch1.jpg) ![Result 2](demo/arch2.jpg) ![Result 3](demo/arch3.jpg) |
 
 </div>
 
-*CLIP semantic search successfully matches natural language queries to relevant images*
-
-</div>
-
-### Sample Output
+### Search Results
 ```python
-query = "people enjoying outdoor activities"
-results = search_engine.search(query, top_k=3)
+query = "a cat sitting on a windowsill"
+results = search_engine.search(query, top_k=5)
 
 # Output:
-# Image: Children_talking_ride.jpg     | Similarity: 0.87
-# Image: A_women_cliciking_pic_of_duck.jpg | Similarity: 0.84
-# Image: Man_surfing_in_snow.jpg       | Similarity: 0.82
+# Image: cat_window_01.jpg | Similarity: 0.89
+# Image: cat_indoor_12.jpg  | Similarity: 0.85
+# Image: pet_home_08.jpg    | Similarity: 0.82
+# Image: feline_rest_03.jpg | Similarity: 0.79
+# Image: cat_relax_15.jpg   | Similarity: 0.76
 ```
 
 ## 🏗️ Architecture
@@ -97,11 +88,18 @@ graph TB
     D --> J[Cosine Similarity Search]
     I --> J
     J --> K[Top-K Results]
+    K --> L[AWS S3]
+    L --> M[Presigned URLs]
+    M --> N[Image Retrieval]
+    
+    O[User Upload] --> P[AWS S3 Storage]
+    P --> E
     
     style B fill:#f9f,stroke:#333,stroke-width:3px
     style F fill:#f9f,stroke:#333,stroke-width:3px
     style I fill:#bbf,stroke:#333,stroke-width:3px
     style J fill:#bfb,stroke:#333,stroke-width:3px
+    style L fill:#fbb,stroke:#333,stroke-width:3px
 ```
 
 ### System Components
@@ -116,7 +114,12 @@ graph TB
    - Metric: Cosine similarity (L2-normalized vectors)
    - Memory: ~26MB for 13K images
 
-3. **API Layer**
+3. **AWS S3 Storage**
+   - Bucket: Scalable cloud image storage
+   - Presigned URLs: Secure, temporary access links
+   - Dynamic uploads: Users can add images to database
+
+4. **API Layer**
    - Framework: Gradio
    - Deployment: HuggingFace Spaces
    - Caching: LRU cache for frequent queries
@@ -176,6 +179,7 @@ gradio>=4.0.0
 Pillow>=10.0.0
 numpy>=1.24.0
 tqdm>=4.65.0
+boto3>=1.28.0  # AWS S3 integration
 ```
 
 3. **Download CLIP model** (automatic on first run)
@@ -185,6 +189,46 @@ model, preprocess = clip.load("ViT-B/32", device="cuda")
 ```
 
 ## 🚀 Usage
+
+### AWS S3 Setup (Optional but Recommended)
+
+```python
+import boto3
+
+# Configure AWS credentials
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id='YOUR_ACCESS_KEY',
+    aws_secret_access_key='YOUR_SECRET_KEY',
+    region_name='us-east-1'
+)
+
+# Create bucket
+bucket_name = 'clip-image-search'
+s3_client.create_bucket(Bucket=bucket_name)
+```
+
+### Upload Images to S3
+
+```python
+from clip_search import S3ImageManager
+
+# Initialize S3 manager
+s3_manager = S3ImageManager(
+    bucket_name='clip-image-search',
+    region='us-east-1'
+)
+
+# Upload images
+s3_manager.upload_image(
+    local_path='path/to/image.jpg',
+    s3_key='images/image.jpg'
+)
+
+# Generate presigned URL (valid for 1 hour)
+url = s3_manager.get_presigned_url('images/image.jpg', expiration=3600)
+print(f"Image URL: {url}")
+```
 
 ### Basic Search
 
@@ -258,27 +302,41 @@ results = engine.search(
 
 ## 🌐 Web Interface
 
-### Local Gradio App
+### Local Gradio App with S3 Integration
 
 ```python
 import gradio as gr
-from clip_search import CLIPSearchEngine
+from clip_search import CLIPSearchEngine, S3ImageManager
 
 engine = CLIPSearchEngine.load("data/faiss_index.bin")
+s3_manager = S3ImageManager(bucket_name='clip-image-search')
 
 def search_interface(query, top_k):
     results = engine.search(query, top_k=int(top_k))
-    return [img_path for img_path, _ in results]
+    # Get presigned URLs for images
+    image_urls = [s3_manager.get_presigned_url(img_path) for img_path, _ in results]
+    return image_urls
 
-demo = gr.Interface(
-    fn=search_interface,
-    inputs=[
-        gr.Textbox(label="Search Query", placeholder="a cat on a couch"),
-        gr.Slider(1, 20, value=9, step=1, label="Number of Results")
-    ],
-    outputs=gr.Gallery(label="Search Results", columns=3),
-    title="CLIP Semantic Image Search"
-)
+def upload_interface(image):
+    # Upload to S3 and add to index
+    s3_key = f"uploads/{hash(image)}.jpg"
+    s3_manager.upload_image(image, s3_key)
+    engine.add_image(s3_key)
+    return "Image uploaded and indexed successfully!"
+
+with gr.Blocks() as demo:
+    with gr.Tab("Search"):
+        query = gr.Textbox(label="Search Query", placeholder="a cat on a couch")
+        top_k = gr.Slider(1, 20, value=9, step=1, label="Number of Results")
+        search_btn = gr.Button("Search")
+        gallery = gr.Gallery(label="Search Results", columns=3)
+        search_btn.click(search_interface, inputs=[query, top_k], outputs=gallery)
+    
+    with gr.Tab("Upload"):
+        upload_image = gr.Image(type="filepath", label="Upload Image")
+        upload_btn = gr.Button("Upload to Database")
+        upload_status = gr.Textbox(label="Status")
+        upload_btn.click(upload_interface, inputs=upload_image, outputs=upload_status)
 
 demo.launch()
 ```
@@ -317,10 +375,6 @@ clip-semantic-search/
 │   ├── images/              # Image database
 │   ├── faiss_index.bin      # FAISS index file
 │   └── metadata.json        # Image metadata
-├── demo/
-│   ├── Children_talking_ride.jpg
-│   ├── A_women_cliciking_pic_of_duck.jpg
-│   └── Man_surfing_in_snow.jpg
 ├── notebooks/
 │   ├── build_index.ipynb    # Index building tutorial
 │   ├── evaluation.ipynb     # Performance evaluation
@@ -391,6 +445,12 @@ faiss:
   index_type: "IndexFlatIP"  # or IndexIVFFlat for large datasets
   normalize: true
   gpu: false
+
+aws:
+  s3_bucket: "clip-image-search"
+  region: "us-east-1"
+  presigned_url_expiration: 3600  # 1 hour
+  enable_s3: true
   
 search:
   default_top_k: 9
@@ -399,14 +459,23 @@ search:
   cache_size: 1000
 ```
 
+### Environment Variables (.env)
+```bash
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_DEFAULT_REGION=us-east-1
+S3_BUCKET_NAME=clip-image-search
+```
+
 ## 🎯 Use Cases
 
-- 🛍️ **E-commerce**: Visual product search
-- 📸 **Photo Management**: Organize personal photo libraries
-- 🎨 **Creative Tools**: Find reference images for artists
-- 📚 **Digital Libraries**: Search image archives
-- 🔍 **Content Moderation**: Find similar problematic content
-- 🎬 **Media Production**: Asset discovery in large collections
+- 🛍️ **E-commerce**: Visual product search with cloud-stored product images
+- 📸 **Photo Management**: Organize personal photo libraries with S3 backup
+- 🎨 **Creative Tools**: Find reference images for artists with dynamic uploads
+- 📚 **Digital Libraries**: Search image archives with scalable cloud storage
+- 🔍 **Content Moderation**: Find similar problematic content across distributed storage
+- 🎬 **Media Production**: Asset discovery in large collections with S3 integration
+- 🌐 **User-Generated Content**: Allow users to upload and search their own images
 
 ## 🔬 Advanced Features
 
@@ -464,6 +533,27 @@ engine.build_index(index_type="IndexIVFFlat", nlist=100)
 engine = CLIPSearchEngine(model_name="ViT-L/14")
 ```
 
+**4. AWS S3 Connection Issues**
+```python
+# Check credentials
+import boto3
+s3 = boto3.client('s3')
+s3.list_buckets()  # Should list your buckets
+
+# Set explicit credentials
+s3_manager = S3ImageManager(
+    bucket_name='your-bucket',
+    aws_access_key_id='YOUR_KEY',
+    aws_secret_access_key='YOUR_SECRET'
+)
+```
+
+**5. Presigned URL Expired**
+```python
+# Generate new URL with longer expiration
+url = s3_manager.get_presigned_url('image.jpg', expiration=7200)  # 2 hours
+```
+
 ## 📊 Comparison with Alternatives
 
 | Method | Accuracy | Speed | Scalability | Zero-Shot |
@@ -481,6 +571,9 @@ Contributions welcome! Areas for improvement:
 - [ ] Add image cropping and aspect ratio handling
 - [ ] Support for video frame search
 - [ ] Multi-language query support
+- [ ] S3 batch upload optimization
+- [ ] CDN integration for faster image delivery
+- [ ] Image deduplication in S3 storage
 
 ## 📝 License
 
