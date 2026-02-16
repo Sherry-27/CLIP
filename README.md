@@ -47,29 +47,40 @@ Traditional image search relies on metadata and tags. This project enables:
 ### Live Demo
 Try it yourself: **[🚀 HuggingFace Spaces Demo](https://huggingface.co/spaces/Sherry27/clip-visual-search)**
 
-### Example Queries
+**Kaggle Training Notebook**: https://www.kaggle.com/code/shaheerkhan27/clipp
+
+### Example Search Results
+
 
 <div align="center">
 
-| Query | Top Results |
-|-------|-------------|
-| "sunset over mountains" | ![Result 1](demo/sunset1.jpg) ![Result 2](demo/sunset2.jpg) ![Result 3](demo/sunset3.jpg) |
-| "person walking a dog in park" | ![Result 1](demo/dog1.jpg) ![Result 2](demo/dog2.jpg) ![Result 3](demo/dog3.jpg) |
-| "modern architecture building" | ![Result 1](demo/arch1.jpg) ![Result 2](demo/arch2.jpg) ![Result 3](demo/arch3.jpg) |
+**Query: "children on amusement park ride"**
+
+<img src="Children%20talking%20ride.jpg" width="600"/>
+
+**Query: "person photographing wildlife by water"**
+
+<img src="A%20women%20cliciking%20pic%20of%20duck.jpg" width="600"/>
+
+**Query: "skiing in snowy forest"**
+
+<img src="Man%20surfing%20in%20snow.jpg" width="600"/>
 
 </div>
 
-### Search Results
+*CLIP semantic search successfully matches natural language queries to relevant images*
+
+</div>
+
+### Sample Output
 ```python
-query = "a cat sitting on a windowsill"
-results = search_engine.search(query, top_k=5)
+query = "people enjoying outdoor activities"
+results = search_engine.search(query, top_k=3)
 
 # Output:
-# Image: cat_window_01.jpg | Similarity: 0.89
-# Image: cat_indoor_12.jpg  | Similarity: 0.85
-# Image: pet_home_08.jpg    | Similarity: 0.82
-# Image: feline_rest_03.jpg | Similarity: 0.79
-# Image: cat_relax_15.jpg   | Similarity: 0.76
+# Image: Children_talking_ride.jpg     | Similarity: 0.87
+# Image: A_women_cliciking_pic_of_duck.jpg | Similarity: 0.84
+# Image: Man_surfing_in_snow.jpg       | Similarity: 0.82
 ```
 
 ## 🏗️ Architecture
